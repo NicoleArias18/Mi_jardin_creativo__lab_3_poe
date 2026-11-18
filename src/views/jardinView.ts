@@ -1,0 +1,1 @@
+//Muestra el lienzo del jardin, la bandeja de las flores creadas y las indicaciones iniciales 
