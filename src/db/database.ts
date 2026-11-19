@@ -8,9 +8,7 @@ export class DatabaseService {
     static async init(): Promise<SqlJsDatabase>{
         if (this.db) return this.db;
 
-        const SQL = await initSqlJs({
-            locateFile: (file: string) => `https://sql.js.org/dist/${file}`
-        });
+        const SQL = await initSqlJs();
 
         const savedData = localStorage.getItem(this.STORAGE_KEY);
         if(savedData) {
@@ -19,6 +17,8 @@ export class DatabaseService {
         }else{
             this.db = new SQL.Database();
         }
+
+        this.db.run('PRAGMA foreign_keys = ON;');
 
         //Crear las tablas por si no existen
         this.db.run(`
@@ -32,7 +32,7 @@ export class DatabaseService {
             CREATE TABLE IF NOT EXISTS flores (
               id INTEGER PRIMARY KEY AUTOINCREMENT,
               jardin_id INTEGER NOT NULL,
-              dibujo_base64 INTEGER NOT NULL,
+              dibujo_base64 TEXT NOT NULL,
               pos_x REAL DEFAULT 50,
               pos_y REAL DEFAULT 50,
               plantada INTEGER DEFAULT 0,
@@ -48,8 +48,12 @@ export class DatabaseService {
     static save(): void {
         if(!this.db) return;
         const data = this.db.export();
-        const base64 = btoa(String.fromCharCode(...data));
-        localStorage.setItem(this.STORAGE_KEY, base64);
+        let binary = '';
+        const chunkSize = 0x8000;
+        for (let i = 0; i < data.length; i += chunkSize) {
+            binary += String.fromCharCode(...data.subarray(i, i + chunkSize));
+        }
+        localStorage.setItem(this.STORAGE_KEY, btoa(binary));
     }
 
     //Obtiene la instancia de la BD
