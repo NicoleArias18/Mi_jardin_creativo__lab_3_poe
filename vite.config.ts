@@ -1,15 +1,18 @@
 import { defineConfig } from 'vite';
+import { fileURLToPath } from 'node:url';
 
 export default defineConfig({
-  optimizeDeps: {
-    // Excluir sql.js de la optimización para que cargue el .wasm correctamente
-    exclude: ['sql.js']
+  resolve: {
+    alias: [
+      {
+        find: /^sql\.js$/,
+        replacement: fileURLToPath(
+          new URL('./node_modules/sql.js/dist/sql-wasm-inline.js', import.meta.url)
+        ),
+      },
+    ],
   },
-  server: {
-    headers: {
-      // Necesario para SharedArrayBuffer (algunas versiones de sql.js)
-      'Cross-Origin-Opener-Policy': 'same-origin',
-      'Cross-Origin-Embedder-Policy': 'require-corp'
-    }
-  }
+  optimizeDeps: {
+    include: ['sql.js'],
+  },
 });
