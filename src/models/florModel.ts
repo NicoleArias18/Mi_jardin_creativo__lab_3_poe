@@ -45,6 +45,16 @@ export class FlorModel {
         DatabaseService.save();
     }
 
+    //Devuelve la flor a la bandeja
+    static desplantar(id: number): void {
+        const db = DatabaseService.getDb();
+        db.run(
+            'UPDATE flores SET pos_x = 50, pos_y = 50, plantada = 0 WHERE id = ?',
+            [id]
+        );
+        DatabaseService.save();
+    }
+
     //Elimina una flor
     static delete(id: number): void{
         const db = DatabaseService.getDb();
